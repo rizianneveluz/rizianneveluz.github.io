@@ -28,27 +28,27 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: ""
 github_username: rizianneveluz
 
-# Build settings
-theme: minima
-# plugins:
-#   - jekyll-feed
-
 # Theme
 theme: jekyll-whiteglass
-# plugins:
-#   - jekyll-archives
-#   - jekyll-paginate
-# permalink: /:year/:month/:day/:title/
-# paginate_path: /posts/:num/
-# paginate: 5
-# jekyll-archives:
-#   enabled:
-#     - categories
-#     - tags
-#   layout: category_archives
-#   permalinks:
-#     category: /categories/:name/
-#    tag: /tags/:name/
+plugins:
+  - jekyll-archives
+  - jekyll-paginate
+  - jekyll-feed
+permalink: /:year/:month/:day/:title/
+
+# jekyll-paginate
+paginate_path: /posts/:num/
+paginate: 5
+
+# jekyll-archives
+jekyll-archives:
+  enabled:
+    - categories
+    - tags
+  layout: category_archives
+  permalinks:
+    category: /categories/:name/
+    tag: /tags/:name/
 
 # Exclude from processing.
 # The following items will not be processed, by default.
