@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>Custom section header views in UICollectionView using UICollectionViewDiffableDataSource</title>
+  <meta name="description" content="There are 5 key steps to using a custom section header view in a UICollectionView that uses a UICollectionViewDiffableDataSource.">
+  
+    
+    <meta name="keywords" content="Swift, UICollectionViewDiffableDataSource, UICollectionView, custom header">
+  
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="/2023/07/10/custom-section-header-uicollectionview-uicollectionviewdiffabledatasource/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="Rizianne Veluz" href="/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="Custom section header views in UICollectionView using UICollectionViewDiffableDataSource">
+  <meta property="og:site_name" content="Rizianne Veluz">
+  <meta property="og:url" content="/2023/07/10/custom-section-header-uicollectionview-uicollectionviewdiffabledatasource/">
+  <meta property="og:description" content="There are 5 key steps to using a custom section header view in a UICollectionView that uses a UICollectionViewDiffableDataSource.">
+  
+  
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="">
+  <meta name="twitter:title" content="Custom section header views in UICollectionView using UICollectionV...">
+  <meta name="twitter:description" content="There are 5 key steps to using a custom section header view in a UICollectionView that uses a UICollectionViewDiffableDataSource.">
+  
+    <meta name="twitter:creator" content="">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+
+  
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Rizianne Veluz</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/archives/">Archives</a>
+      
+        
+        <a class="page-link" href="https://github.com/rizianneveluz">GitHub</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">Custom section header views in UICollectionView using UICollectionViewDiffableDataSource</h1>
+    
+    <p class="post-meta"><time datetime="2023-07-10T08:35:59+00:00" itemprop="datePublished">Jul 10, 2023</time> •
+  
+    
+    
+      
+        <a href="/categories/swift/">Swift</a>,
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+        <a href="/categories/uicollectionviewdiffabledatasource/">UICollectionViewDiffableDataSource</a>,
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+    
+      
+        <a href="/categories/uicollectionview/">UICollectionView</a>
+      
+    
+  
+
+
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>There are 5 key steps to using a custom section header view in a UICollectionView that uses a <code class="language-plaintext highlighter-rouge">UICollectionViewDiffableDataSource</code>.</p>
+
+<ol>
+  <li>Initialize the data source</li>
+  <li>Set the header reference size</li>
+  <li>Register the custom header view as the collection view’s <code class="language-plaintext highlighter-rouge">elementKindSectionHeader</code> supplementary view</li>
+  <li>Define the data source’s <code class="language-plaintext highlighter-rouge">supplementaryViewProvider</code> closure</li>
+  <li>Apply your data to the data source</li>
+</ol>
+
+<p>We can see these in action below.</p>
+
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="kd">final</span> <span class="kd">class</span> <span class="kt">ViewController</span><span class="p">:</span> <span class="kt">UIViewController</span> <span class="p">{</span>
+    <span class="kd">@IBOutlet</span> <span class="kd">private</span> <span class="k">weak</span> <span class="k">var</span> <span class="nv">collectionView</span><span class="p">:</span> <span class="kt">UICollectionView</span><span class="o">!</span>
+  
+    <span class="c1">// 1. Initialize the data source</span>
+    <span class="kd">private</span> <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">dataSource</span> <span class="o">=</span> <span class="kt">CollectionViewDataSource</span><span class="p">(</span><span class="n">collectionView</span><span class="p">)</span>
+    <span class="kd">private</span> <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">collectionViewLayout</span><span class="p">:</span> <span class="kt">UICollectionViewFlowLayout</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">layout</span> <span class="o">=</span> <span class="kt">UICollectionViewFlowLayout</span><span class="p">()</span>
+        <span class="c1">// 2. Set the header reference size</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">headerReferenceSize</span> <span class="o">=</span> <span class="kt">CGSize</span><span class="p">(</span><span class="nv">width</span><span class="p">:</span> <span class="n">collectionView</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+                                            <span class="nv">height</span><span class="p">:</span> <span class="mi">50</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">layout</span>
+    <span class="p">}()</span>
+
+    <span class="k">override</span> <span class="kd">func</span> <span class="nf">viewDidLoad</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">super</span><span class="o">.</span><span class="nf">viewDidLoad</span><span class="p">()</span>
+        <span class="n">collectionView</span><span class="o">.</span><span class="n">collectionViewLayout</span> <span class="o">=</span> <span class="n">collectionViewLayout</span>
+        <span class="c1">// 3. Register the header view</span>
+        <span class="n">collectionView</span><span class="o">.</span><span class="nf">register</span><span class="p">(</span><span class="kt">UINib</span><span class="p">(</span><span class="nv">nibName</span><span class="p">:</span> <span class="s">"HeaderCollectionReusableView"</span><span class="p">,</span>
+                                      <span class="nv">bundle</span><span class="p">:</span> <span class="o">.</span><span class="n">main</span><span class="p">),</span>
+                                <span class="nv">forSupplementaryViewOfKind</span><span class="p">:</span> <span class="kt">UICollectionView</span><span class="o">.</span><span class="n">elementKindSectionHeader</span><span class="p">,</span>
+                                <span class="nv">withReuseIdentifier</span><span class="p">:</span> <span class="s">"HeaderCollectionReusableViewReuseIdentifier"</span><span class="p">)</span>
+        <span class="c1">// 4. Define the `supplementaryViewProvider` closure</span>
+        <span class="n">dataSource</span><span class="o">.</span><span class="n">supplementaryViewProvider</span> <span class="o">=</span> <span class="p">{</span> <span class="p">[</span><span class="k">weak</span> <span class="k">self</span><span class="p">]</span> <span class="n">collectionView</span><span class="p">,</span> <span class="n">supplementaryViewKind</span><span class="p">,</span> <span class="n">indexPath</span> <span class="k">in</span>
+            <span class="k">switch</span> <span class="n">supplementaryViewKind</span> <span class="p">{</span>
+                <span class="k">case</span> <span class="kt">UICollectionView</span><span class="o">.</span><span class="nv">elementKindSectionHeader</span><span class="p">:</span>
+                    <span class="k">guard</span> <span class="k">let</span> <span class="nv">headerView</span> <span class="o">=</span> <span class="n">collectionView</span><span class="o">.</span><span class="nf">dequeueReusableSupplementaryView</span><span class="p">(</span><span class="nv">ofKind</span><span class="p">:</span> <span class="n">supplementaryViewKind</span><span class="p">,</span>
+                                                                                           <span class="nv">withReuseIdentifier</span><span class="p">:</span> <span class="s">"HeaderCollectionReusableViewReuseIdentifier"</span><span class="p">,</span>
+                                                                                           <span class="nv">for</span><span class="p">:</span> <span class="n">indexPath</span><span class="p">)</span> <span class="k">as?</span> <span class="kt">HeaderCollectionReusableView</span>
+                    <span class="k">else</span> <span class="p">{</span>
+                        <span class="nf">fatalError</span><span class="p">(</span><span class="s">"Failed to dequeue header view with reuse identifier `HeaderCollectionReusableViewReuseIdentifier`"</span><span class="p">)</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="k">let</span> <span class="nv">sectionIdentifier</span> <span class="o">=</span> <span class="k">self</span><span class="p">?</span><span class="o">.</span><span class="n">dataSource</span><span class="o">.</span><span class="nf">snapshot</span><span class="p">()</span><span class="o">.</span><span class="n">sectionIdentifiers</span><span class="p">[</span><span class="n">indexPath</span><span class="o">.</span><span class="n">section</span><span class="p">]</span> <span class="p">{</span>
+                        <span class="c1">// If you're using a view model, you can bind it to the header view here</span>
+                        <span class="n">headerView</span><span class="o">.</span><span class="nf">setTitle</span><span class="p">(</span><span class="s">"Section ID: </span><span class="se">\(</span><span class="n">sectionIdentifier</span><span class="o">.</span><span class="n">uuidString</span><span class="o">.</span><span class="nf">prefix</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+                    <span class="p">}</span>
+                    <span class="k">return</span> <span class="n">headerView</span>
+                <span class="k">default</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">nil</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="c1">// 5. Apply your data to the data source</span>
+        <span class="c1">// If you're using a view model, you can use that to define the items below</span>
+        <span class="n">dataSource</span><span class="o">.</span><span class="nf">apply</span><span class="p">([</span><span class="kt">UUID</span><span class="p">(),</span> <span class="kt">UUID</span><span class="p">(),</span> <span class="kt">UUID</span><span class="p">(),</span> <span class="kt">UUID</span><span class="p">(),</span> <span class="kt">UUID</span><span class="p">()])</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/* -------------------------------------------------------------------------------
+    Just added this part for completion.
+    You can skip it if already familiar with `UICollectionViewDiffableDataSource`
+*/</span>
+<span class="kd">typealias</span> <span class="kt">SectionIdentifier</span> <span class="o">=</span> <span class="kt">UUID</span>
+<span class="kd">typealias</span> <span class="kt">ItemIdentifier</span> <span class="o">=</span> <span class="kt">UUID</span>
+
+<span class="kd">final</span> <span class="kd">class</span> <span class="kt">CollectionViewDataSource</span><span class="p">:</span> <span class="kt">UICollectionViewDiffableDataSource</span><span class="o">&lt;</span><span class="kt">SectionIdentifier</span><span class="p">,</span> <span class="kt">ItemIdentifier</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">collectionView</span><span class="p">:</span> <span class="kt">UICollectionView</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">super</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">collectionView</span><span class="p">:</span> <span class="n">collectionView</span><span class="p">)</span> <span class="p">{</span> <span class="n">collectionView</span><span class="p">,</span> <span class="n">indexPath</span><span class="p">,</span> <span class="n">itemIdentifier</span> <span class="k">in</span>
+          <span class="k">guard</span> <span class="k">let</span> <span class="nv">cell</span> <span class="o">=</span> <span class="n">collectionView</span><span class="o">.</span><span class="nf">dequeueReusableCell</span><span class="p">(</span><span class="nv">withReuseIdentifier</span><span class="p">:</span> <span class="s">"CollectionViewCellReuseIdentifier"</span><span class="p">,</span>
+                                                              <span class="nv">for</span><span class="p">:</span> <span class="n">indexPath</span><span class="p">)</span> <span class="k">as?</span> <span class="kt">CollectionViewCell</span>
+          <span class="k">else</span> <span class="p">{</span>
+              <span class="nf">fatalError</span><span class="p">(</span><span class="s">"Failed to dequeue cell with reuse identifier `CollectionViewCellReuseIdentifier`"</span><span class="p">)</span>
+          <span class="p">}</span>
+          <span class="c1">// If you're using a cell view model, you can bind it to the cell here</span>
+          <span class="n">cell</span><span class="o">.</span><span class="nf">setTitle</span><span class="p">(</span><span class="s">"Item ID:</span><span class="se">\n\(</span><span class="n">itemIdentifier</span><span class="o">.</span><span class="n">uuidString</span><span class="o">.</span><span class="nf">prefix</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+          <span class="k">return</span> <span class="n">cell</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">func</span> <span class="nf">apply</span><span class="p">(</span><span class="n">_</span> <span class="nv">sectionIdentifiers</span><span class="p">:</span> <span class="p">[</span><span class="kt">SectionIdentifier</span><span class="p">])</span> <span class="p">{</span>
+      <span class="k">var</span> <span class="nv">snapshot</span> <span class="o">=</span> <span class="kt">NSDiffableDataSourceSnapshot</span><span class="o">&lt;</span><span class="kt">SectionIdentifier</span><span class="p">,</span> <span class="kt">ItemIdentifier</span><span class="o">&gt;</span><span class="p">()</span>
+      <span class="n">snapshot</span><span class="o">.</span><span class="nf">appendSections</span><span class="p">(</span><span class="n">sectionIdentifiers</span><span class="p">)</span>
+      <span class="n">sectionIdentifiers</span><span class="o">.</span><span class="n">forEach</span> <span class="p">{</span>
+          <span class="c1">// If you're using a view model, you can use that to define the items below</span>
+          <span class="n">snapshot</span><span class="o">.</span><span class="nf">appendItems</span><span class="p">([</span><span class="kt">UUID</span><span class="p">(),</span> <span class="kt">UUID</span><span class="p">(),</span> <span class="kt">UUID</span><span class="p">(),</span> <span class="kt">UUID</span><span class="p">()],</span>
+                                <span class="nv">toSection</span><span class="p">:</span> <span class="nv">$0</span><span class="p">)</span>
+      <span class="p">}</span>
+      <span class="nf">apply</span><span class="p">(</span><span class="n">snapshot</span><span class="p">,</span>
+            <span class="nv">animatingDifferences</span><span class="p">:</span> <span class="kc">false</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<h2 id="notes">Notes</h2>
+<ul>
+  <li>Unlike <code class="language-plaintext highlighter-rouge">UITableView</code> where we can implement <code class="language-plaintext highlighter-rouge">UITableViewDelegate</code> to define a custom header view regardless if we use <code class="language-plaintext highlighter-rouge">UITableViewDiffableDataSource</code> or <code class="language-plaintext highlighter-rouge">UITableViewDataSource</code>, it seems the same is not true for <code class="language-plaintext highlighter-rouge">UICollectionView</code>. When using <code class="language-plaintext highlighter-rouge">UICollectionViewDiffableDataSource</code>, we need to define the data source’s <code class="language-plaintext highlighter-rouge">supplementaryViewProvider</code> closure instead.</li>
+  <li>We need to set the header reference size, otherwise, the header will not appear as indicated by the <a href="https://developer.apple.com/documentation/uikit/uicollectionviewflowlayout/1617710-headerreferencesize">documentation</a>:</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>If the size in the appropriate scrolling dimension is 0, no header is added.
+
+The default size values are (0, 0).
+</code></pre></div></div>
+
+<h2 id="demo">Demo</h2>
+
+<p>Finally, here’s a demo of the above. (Obviously I added some more UI code to the snippet above)</p>
+
+<p><img src="/static_files/videos/2023-07-10-custom-section-header-uicollectionview-uicollectionviewdiffabledatasource_1.gif" alt="Demo: Custom section header views in UICollectionView using UICollectionViewDiffableDataSource" width="350" style="display: block; margin-left: auto; margin-right: auto;" /></p>
+
+  </div>
+
+  
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; Rizianne Veluz - Powered by <a href="https://jekyllrb.com">Jekyll</a> &amp; <a href="https://github.com/yous/whiteglass">whiteglass</a> - Subscribe via <a href="/feed.xml">RSS</a>
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
