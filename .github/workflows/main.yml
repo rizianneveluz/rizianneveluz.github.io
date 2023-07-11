@@ -1,0 +1,20 @@
+name: Jekyll Deployment
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+      - name: Build & Deploy to GitHub Pages
+        uses: helaili/jekyll-action@v2
+        with:
+          target_branch: 'gh-pages'
+          token: ${{ secrets.GITHUB_TOKEN }}
